@@ -7,7 +7,12 @@ Category: [Which category from the list]
 
 2. SOLUTION (3-4 sentences)
    What is your MVP? What are the 1-3 core features?
-
+   SecureNotes is a note taking application with security and privacy first in mind. 
+   Secure Notes allows users to secure their notes via encryption and password protection. 
+   Notes are mainly created and stored locally as a way to ensure that confidential is not
+   uploaded to an external third-party but premium/enterprise options allows for sync and 
+   collaboration.
+   
 3. TARGET MARKET (1-2 sentences)
    Who will use this? How many potential customers?
 
