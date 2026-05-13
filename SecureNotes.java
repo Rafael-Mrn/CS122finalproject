@@ -3,6 +3,7 @@ import java.io.*;
 import java.nio.file.*;
 import java.security.*;
 import java.util.Base64;
+import java.util.HashSet;
 
 
 
@@ -11,7 +12,11 @@ class SecureNotes {
     /*This will run a while loop with options given to create/edit an existing text file (classs fileDatabase, fileCreate and fileEditor method), password protect a file (passwordProtector method),
     encrypt/decrypt a file (fileEncrypt). The loop only begins after successful login (class Credentials). The loop will automatically exit after 5 mintues of inactivity during login.
     */
+
+    private HashSet<Note> existingNotes = new HashSet<Note>();
+
     public static void main(String[] args) {
+        
         System.out.println("Welcome to SecureNotes");
         System.out.println("Enter username: ");
         
@@ -33,18 +38,20 @@ class Credentials{
     HashMap<String, String> credentials = new HashMap<String, String>();
     private String username;
     private String password;
-//Constructor
+
     public Credentials(){
-        credentials = new HashMap<>();}
+        credentials = new HashMap<>();
+    }
 
     //Creating a new user
     public void user(String username, String password){
-if(credentials.containsKey(username)){
-    System.out.println("Username already exists.");
-    }else{
-    credentials.put(username, password);
-    System.out.println("User created successfully.");}
-}
+        if(credentials.containsKey(username)){
+        System.out.println("Username already exists.");
+        }else{
+        credentials.put(username, password);
+        System.out.println("User created successfully.");}
+    }
+
     // This is the login method
     public boolean login(String username, String password){
        if(credentials.containsKey(username)){ 
@@ -64,6 +71,7 @@ if(credentials.containsKey(username)){
             return false;
         }
     }
+
     //Checking
         public boolean userExists(String username){
            return credentials.containsKey(username);
@@ -80,15 +88,11 @@ if(credentials.containsKey(username)){
             }
         }
 
-    // Getting the current log in username
-    public String getCurrentUsername(){
-        return username;
-    }
+    // Returns the current login username
+    public String getCurrentUsername() {return username;}
 
-    //Getting the current log in password
-    public String getCurrentPassword(){
-        return password;
-    }
+    // Returns the current login password
+    public String getCurrentPassword() {return password;}
 }
             
 
@@ -101,11 +105,6 @@ class Note{
     private boolean isPasswordProtected;
     private boolean isEncrypted;
     private String passwordHash;
-
-    private static final String ALGORITHM = "AES";
-    private static final String TRANSFORMATION = "AES/CBC/PKCS5Padding";
-    private static final int KEY_SIZE = 128;
-
     
     public Note(String name, String directory, boolean isPasswordProtected, boolean isEncrypted){
         this.name = name;
@@ -114,12 +113,15 @@ class Note{
         this.isEncrypted = isEncrypted;
     }
 
+    //Creates the Note's respective file
     public boolean create(){
         File file = new File(directory, name + ".txt");
         try{
-            if (!file.getParentFile().exists()){
-                file.getParentFile().mkdir();
+            //Make the full directory if one wasn't provided or doesn't exist
+            if (file.getParentFile() != null && !file.getParentFile().exists()){
+                file.getParentFile().mkdirs();
             }
+            //Creates the file
             if (!file.createNewFile()){
                 System.out.println(file + "already exists!");
                 return false;
@@ -132,17 +134,13 @@ class Note{
         }
     }
 
-    
-    // ─────────────────────────────────────────────
-    //  FILE EDITOR  (create or overwrite content)
-    // ─────────────────────────────────────────────
+    /* FILE EDITOR  (create or overwrite content)
+       ─────────────────────────────────────────────
+       Writes (or overwrites) the note's content.
+       If the note is password-protected, the correct password must be supplied.
+       If the note is encrypted, content is encrypted before writing. */
 
-    /**
-     * Writes (or overwrites) the note's content.
-     * If the note is password-protected, the correct password must be supplied.
-     * If the note is encrypted, content is encrypted before writing.
-     */
-    public void fileEditor(String content, String password) throws Exception {
+    public void noteEditor(String content, String password) throws Exception {
         if (!authenticate(password)) {
             System.out.println("Incorrect password. Edit denied.");
             return;
@@ -190,20 +188,18 @@ class Note{
     //  PASSWORD PROTECTION
     // ─────────────────────────────────────────────
 
-    /**
-     * Enables password protection by hashing and storing the given password.
-     */
+    //Enables password protection by hashing and storing the given password.
     public void passwordProtector(String password) throws NoSuchAlgorithmException {
         if (password == null || password.isEmpty()) {
             System.out.println("Password cannot be empty.");
             return;
         }
-        this.passwordHash = hashPassword(password);
+        this.passwordHash = hashPassword(password); //Stores the hash String
         this.isPasswordProtected = true;
         System.out.println("Password protection enabled.");
     }
 
-    /** Removes password protection from the note. */
+    //Removes password from the note
     public void removePassword(String currentPassword) throws NoSuchAlgorithmException {
         if (!authenticate(currentPassword)) {
             System.out.println("Incorrect password. Cannot remove protection.");
@@ -214,18 +210,20 @@ class Note{
         System.out.println("Password protection removed.");
     }
 
-    /** Returns true when the password matches (or no protection is set). */
+    //Returns true when the password matches (or no protection is set).
     private boolean authenticate(String password) throws NoSuchAlgorithmException {
-        if (!isPasswordProtected) return true;
+        //Notes with no password protection are automatically authenticated
+        if (!isPasswordProtected) return true; 
         if (password == null) return false;
+        //Hashes the provided password and compares it with the existing password's hash
         return hashPassword(password).equals(passwordHash);
     }
 
-    /** SHA-256 one-way hash. */
+    //SHA-256 one-way hash
     private String hashPassword(String password) throws NoSuchAlgorithmException {
-        MessageDigest digest = MessageDigest.getInstance("SHA-256");
-        byte[] hash = digest.digest(password.getBytes());
-        return Base64.getEncoder().encodeToString(hash);
+        MessageDigest digest = MessageDigest.getInstance("SHA-256"); //Instantiates a SHA-256 hash
+        byte[] hash = digest.digest(password.getBytes()); //Hashes the binary version of String password stores it in a byte array
+        return Base64.getEncoder().encodeToString(hash); //Returns the byte[] hash as a readable String
     }
     
     // ─────────────────────────────────────────────
@@ -251,9 +249,7 @@ class Note{
         return encrypted.toString();
 }
 
-    /**
-    * Decrypts a Caesar-encrypted string by reversing the shift.
-    */
+    //Decrypts a Caesar-encrypted string by reversing the shift.
     public String fileDecrypt(String encryptedText, String password) {
         int shift = deriveShift(password);
         StringBuilder decrypted = new StringBuilder();
