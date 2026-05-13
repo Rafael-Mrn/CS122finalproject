@@ -226,14 +226,12 @@ class Note{
         return Base64.getEncoder().encodeToString(hash); //Returns the byte[] hash as a readable String
     }
     
-    // ─────────────────────────────────────────────
-    //  ENCRYPTION / DECRYPTION  (Caesar Cipher)
-    // ─────────────────────────────────────────────
 
-    /**
-    * Encrypts plaintext using a Caesar cipher.
-    * The shift value is derived from the sum of the password's char values.
-    */
+    /*  ENCRYPTION / DECRYPTION  (Caesar Cipher)
+        ─────────────────────────────────────────────
+        Encrypts plaintext using a Caesar cipher.
+        The shift value is derived from the sum of the password's char values. */
+
     public String fileEncrypt(String plainText, String password) {
         int shift = deriveShift(password);
         StringBuilder encrypted = new StringBuilder();
@@ -265,10 +263,7 @@ class Note{
         return decrypted.toString();
     }
 
-    /**
-    * Derives a shift value (1–25) from the password
-    * by summing its char values and clamping to the alphabet size.
-    */
+    //Derives a shift value (1–25) from the password by summing its char values and clamping to the alphabet size.
     private int deriveShift(String password) {
         int sum = 0;
         for (char c : password.toCharArray()) {
