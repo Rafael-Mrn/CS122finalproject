@@ -33,13 +33,67 @@ class Credentials{
     HashMap<String, String> credentials = new HashMap<String, String>();
     private String username;
     private String password;
+//Constructor
+    public Credentials(){
+        credentials = new HashMap<>();}
 
-    public void Users(String username){
+    //Creating a new user
+    public void user(String username, String password){
+if(credentials.containsKey(username)){
+    System.out.println("Username already exists.");
+    }else{
+    credentials.put(username, password);
+    System.out.println("User created successfully.");}
+}
+    // This is the login method
+    public boolean login(String username, String password){
+       if(credentials.containsKey(username)){ 
+           if(credentials.get(username).equals(password)){
+               this.username = username;
+               this.password = password;
 
+            System.out.println("Login was successful.");
+               return true;
+           }
+           else{ System.out.println("Incorrect password!");
+                return false;    
+           }
+       }
+        else{
+            System.out.println("Username not found.");
+            return false;
+        }
+    }
+    //Checking
+        public boolean userExists(String username){
+           return credentials.containsKey(username);
+        }
+
+    //Removing user
+            public void removeUser(String username){
+                if(credentials.containsKey(username)){
+                credentials.remove(username);
+                System.out.println("User removed.");
+        }
+            else{
+                System.out.println("User does not exist.");
+            }
+        }
+
+    // Getting the current log in username
+    public String getCurrentUsername(){
+        return username;
+    }
+
+    //Getting the current log in password
+    public String getCurrentPassword(){
+        return password;
     }
 }
+            
 
 class Note{
+    
     /*create/edit an existing text file (classs Notes, fileEditor method), password protect a file (passwordProtector method),
     encrypt/decrypt a file (fileEncrypt)*/
     private String name;
