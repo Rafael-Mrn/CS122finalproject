@@ -52,9 +52,9 @@ class SecureNotes {
             System.out.println("\n==========================");
             System.out.println("     SecureNotes Menu     ");
             System.out.println("==========================");
-            System.out.println("1. Manage notes (Create or Delete)");
-            System.out.println("2. Edit an existing note");
-            System.out.println("3. Decrypt a note");
+            System.out.println("1. Manage Notes (Create or Delete)");
+            System.out.println("2. Edit an existing Note");
+            System.out.println("3. Read/Decrypt a note");
             System.out.println("4. Remove password from a note");
             System.out.println("5. Exit");
 
@@ -125,14 +125,15 @@ class SecureNotes {
                         System.out.println("Note not found.");
                     }
                 } 
-            // ── 2. EDIT NOTE ─────────────────────────────────────────────
-            } else if (choice == 2) {
+            // ── 2. EDIT NOTES ─────────────────────────────────────────────
+            } else if (choice == 2) {   
+                System.out.println("\n=====NOTE EDITOR=====");
                 listNotes();
                 if (existingNotes.isEmpty()) continue;
- 
+
                 System.out.print("Enter Note name to edit: ");
                 String name = scan.nextLine();
- 
+                    
                 Note target = findNote(name);
                 if (target == null) {
                     System.out.println("Note not found.");
@@ -141,16 +142,34 @@ class SecureNotes {
  
                 System.out.print("Enter Note password: ");
                 String password = scan.nextLine();
+                
+                System.out.println(target.getName() + ":\n");
+
+                try {
+                    System.out.print(target.read(password) + "\n");
+                } catch (Exception e) {
+                    System.out.println("Error reading note: " + e.getMessage());
+                }
+
                 System.out.print("Enter content to append: ");
                 String content = scan.nextLine();
- 
+                    
                 try {
-                    target.editor(content, password);
+                    String existingContent = target.read(password);
+                    String fullContent = existingContent + content;
+                    String encryptedFull = target.encrypt(fullContent, password);
+
+                    try (BufferedWriter writer = new BufferedWriter(new FileWriter(target.getFile(), false))) {
+                        writer.write(encryptedFull);
+                    } catch (Exception e) {
+                        System.out.println("Error editing note: " + e.getMessage());
+                    }
                 } catch (Exception e) {
-                    System.out.println("Error editing note: " + e.getMessage());
+                        System.out.println("Error editing note: " + e.getMessage());
                 }
+
  
-            // ── 3. DECRYPT NOTE ──────────────────────────────────────────
+            // ── 3. READ/DECRYPT NOTE ──────────────────────────────────────────
             } else if (choice == 3) {
                 listNotes();
                 if (existingNotes.isEmpty()) continue;
@@ -342,6 +361,7 @@ class Note{
     public String getDirectory() {return directory;}
     public boolean getIsPasswordProtected() {return isPasswordProtected;}
     public boolean getIsEncrypted() {return isEncrypted;}
+    public File getFile() {return file;}
 
     //Creates the Note's respective file
     public boolean create(){
@@ -380,7 +400,8 @@ class Note{
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, true))) {
             writer.write(content);
-            System.out.println("Note saved successfully.");
+            System.out.println("Content saved successfully.");
+
         } catch (IOException e) {
             System.err.println("Error writing file: " + e.getMessage());
         }
@@ -389,12 +410,6 @@ class Note{
 
     //Reads the note's content. If encrypted, the content is decrypted before being returned.
     public String read(String password) throws Exception {
-        //If password is incorrect, read will be denied
-        if (!authenticate(password)) {
-            System.out.println("Incorrect password. Read denied.");
-            return null;
-        }
-
         StringBuilder content = new StringBuilder();
 
         //Builds content line by line and catches the IOException
@@ -411,7 +426,13 @@ class Note{
         String raw = content.toString().trim();
 
         //If isEncrypted == true, return decrypted note, else return raw
-        return isEncrypted ? decrypt(raw, password) : raw;
+        //If password is incorrect, read will be denied
+        if (!authenticate(password)) {
+            System.out.println("Incorrect password. Decryption denied.");
+            return raw;
+        } else{
+            return isEncrypted? decrypt(raw, password) : raw;
+        }
     }
 
     /*  PASSWORD PROTECTION
@@ -476,6 +497,8 @@ class Note{
                 encrypted.append(c);  // non-letters are unchanged
             }
         }
+
+        isEncrypted = true;
         return encrypted.toString();
 }
 
@@ -492,6 +515,7 @@ class Note{
                 decrypted.append(c);  // non-letters are unchanged
             }
         }
+
         return decrypted.toString();
     }
 
