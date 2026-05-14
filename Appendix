@@ -1,11 +1,12 @@
 1. TEAM CONTRIBUTION
-who coded what]
+   Rafael worked on the Notes and SecureNote classes. Morgan worked on the Credential class and testing code. 
 
 2. JAVA CONCEPTS APPLIED
-   [File I/O, ArrayList, HashMap]
+   [File I/O, ArrayList, HashMap, HashSet, hashing]
 
 3. CHALLENGES & SOLUTIONS
-   [Our idea was too broad for the short amount of time we had to create this. It would be a lot better if we had more time and could dedicate it to our future implementations.]
+   [Our idea was too broad for the short amount of time we had to create this. It would be a lot better if we had more time and could dedicate it to our future implementations.
+   Additionally some of the core features in our MVP required learning so we used resources outside of class especially when working on password hashing.]
 
 4. PROJECT TIMELINE
    [Week 1: Researching + Finalizing our idea + Gauging how works would be split
@@ -13,19 +14,17 @@ who coded what]
    Week 2: Curating the presentation/appendix + working on the codebase (MVP)]
 
 5. HOW WE COLLABORATED
-   [Day One- Discussed our proposal and started building upon each others ideas based on our own personal passions (cybersecurity).
-Week one/two- we randomly were working on the proposal outside of class at the same time and messaged each other since then. 
-Making sure we are both on the same page and adding stuff that we learned/know into our project in someway.
-We communicated everything together verbally and outside of class the entire process.]
+   [Day One- Discussed our proposal and started building upon each others ideas based on our own personal passions which included cybersecurity.
+   Week one/two- We worked on the proposal in class and communicated outside of class to finalize our work. Throughout the entire project, we shared our ideas and updated each other based on what we had worked on using Discord. Our GitHub repository helped us centralize our work and share what we did. We also split our work based on our roles.]
 
-6. VIABILITY TESTING (new section)
+1. VIABILITY TESTING (new section)
    [How you validated the MVP in practice]
    - User testing we did
    - Feedback we got
    - Changes we made based on testing
    - Proof that viability claims are real (not theoretical)
 
-7. CITATIONS & EXTERNAL RESOURCES (REQUIRED)
+2. CITATIONS & EXTERNAL RESOURCES (REQUIRED)
    [All sources including research for proposal sections 9-10]
     Source 1: TherapyNotes
 https://www.therapynotes.com/
@@ -43,9 +42,11 @@ Source 5: Epic EHR Health System Platform
 https://www.epic.com/software/
 
 Interviews: A licensed therapist (Aime Petrikas)
+
 8. REFLECTIONS & LESSONS LEARNED
-I believe our idea was solid and integrated our world (cybersecurity/tech) mixing it with healthcare.
-It is not really vocalized on the therapists perspectives while using new digital tools to help them.
-It is definitely an underrated topic. Not a lot of people are educated on the concept/background info
-that is putting this into works, because we are normally the user in this case, not the developer.
-I'd like to further expand on this project with more time, so it can build up to it's capabilities. (Mo)
+   Uur idea was solid and integrated our world interests in cybersecurity and mixed it with a real need within healthcare.
+   Therapist's prespectives on their need for digital tools and secure workflows is not commonly vocalized but this project helped us 
+   identify a problem and practice implementing a solution that advocated for their needs. It is definitely an underrated topic that 
+   not a lot of people are aware of. While this does target workers in the healthcare industry, SecureNotes could also serve well as a 
+   stand alone app for the average person who needs a local form of secure note taking. With more time, we would expand the 
+   capabilities of the app and research how security features are implemented in java codebases in general.
