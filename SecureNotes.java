@@ -1,9 +1,11 @@
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Scanner;
 import java.io.*;
-import java.nio.file.*;
 import java.security.*;
 import java.util.Base64;
-import java.util.HashSet;
+
+
 
 
 
@@ -14,85 +16,150 @@ class SecureNotes {
     */
 
     private HashSet<Note> existingNotes = new HashSet<Note>();
+    
+
 
     public static void main(String[] args) {
+        Scanner scan = new Scanner(System.in);
+        Credentials credentials = new Credentials();
         
-        System.out.println("Welcome to SecureNotes");
-        System.out.println("Enter username: ");
+        System.out.println("====================================================================================");
+        System.out.println("Welcome to SecureNotes, the secure HIPAA-aware note-taking platform for therapists.");
+        System.out.println("====================================================================================\n");
         
-        /*
-        1. Manage notes (Create or Delete)
-        2. Edit an existing note
-        3. Encrypt a note
-        4. Password Protect a note
-        5. Exit
-         */
+        boolean registration = false;
+        while (!registration){
+            System.out.print("Enter a username to register: ");
+            String username = scan.nextLine();
+            System.out.print("Create a password: ");
+            String password = scan.nextLine();
+            
+            if (credentials.register(username, password)){
+                registration = true;
+            }
+        }
+
+        boolean login = false;
+        while (!login){
+            System.out.print("Enter your username to login: ");
+            String username = scan.nextLine();
+            System.out.print("Password: ");
+            String password = scan.nextLine();
+
+            if (credentials.login(username, password)){
+                login = true;
+            }
+        }
+
+        int choice = 0;
+
+        while (choice != 5){
+            System.out.println("1. Manage notes (Create or Delete)");
+            System.out.println("2. Edit an existing note");
+            System.out.println("3. Decrypt a note");
+            System.out.println("4. Remove password from a note");
+            System.out.println("5. Exit");
+
+            System.out.print("Enter a choice 1-5: ");
+            choice = scan.nextInt();
+
+            if (choice == 1){
+                System.out.println("=====NOTE MANAGER=====")
+                System.out.println("1. Create new Note");
+                System.out.println("2. Delete an existing Note");
+                
+                System.out.println("Enter a choice 1 or 2: ");
+                int managerChoice = scan.nextInt();
+
+                if (managerChoice == 1){
+                    System.out.print("Enter new Note's name: ");
+                    System.out.println("Enter password to access note: ")
+                }
+
+
+
+            }
+
+        }
+        
 
     }
 
     
 }
 
-class Credentials{
-    //Creates new credentials and stores them in an an existing HashMap (credentials). Checks if a credential exists and approves login attempts
-    HashMap<String, String> credentials = new HashMap<String, String>();
-    private String username;
-    private String password;
+class Credentials {
 
-    public Credentials(){
+    // Stores username -> [hash, salt] pairs
+    private final HashMap<String, String> credentials;
+    private String currentUsername;
+
+    public Credentials() {
         credentials = new HashMap<>();
     }
 
-    //Creating a new user
-    public void user(String username, String password){
-        if(credentials.containsKey(username)){
-        System.out.println("Username already exists.");
-        }else{
-        credentials.put(username, password);
-        System.out.println("User created successfully.");}
+    public boolean register(String username, String password) {
+        if (username == null || username.isBlank()) {
+            System.out.println("Username cannot be empty, try again.");
+            return false;
+        }
+        if (credentials.containsKey(username)) {
+            System.out.println("Username already exists, try again.");
+            return false;
+        }
+        if (password == null || password.isBlank()) {
+            System.out.println("Password cannot be empty, try again.");
+            return false;
+        }
+
+        try {
+            String hash = hashPassword(password);
+            credentials.put(username, hash);
+            System.out.println("\nUser registered successfully!\n");
+        } catch (NoSuchAlgorithmException e) {
+            System.err.println("Error registering user: " + e.getMessage());
+        }
+        return true;
     }
 
-    // This is the login method
-    public boolean login(String username, String password){
-       if(credentials.containsKey(username)){ 
-           if(credentials.get(username).equals(password)){
-               this.username = username;
-               this.password = password;
-
-            System.out.println("Login was successful.");
-               return true;
-           }
-           else{ System.out.println("Incorrect password!");
-                return false;    
-           }
-       }
-        else{
+    public boolean login(String username, String password) {
+        if (!credentials.containsKey(username)) {
             System.out.println("Username not found.");
             return false;
         }
+
+        try {
+            String hash = credentials.get(username);
+            if (hashPassword(password).equals(hash)) {
+                currentUsername = username;
+                System.out.println("\nLogin successful. Welcome, " + username + "!\n");
+            } else {
+                System.out.println("Incorrect password.");
+                return false;
+            }
+        } catch (NoSuchAlgorithmException e) {
+            System.err.println("Login error: " + e.getMessage());
+            return false;
+        }
+        return true;
     }
 
-    //Checking
-        public boolean userExists(String username){
-           return credentials.containsKey(username);
-        }
+    public boolean userExists(String username) {
+        return credentials.containsKey(username);
+    }
 
-    //Removing user
-            public void removeUser(String username){
-                if(credentials.containsKey(username)){
-                credentials.remove(username);
-                System.out.println("User removed.");
-        }
-            else{
-                System.out.println("User does not exist.");
-            }
-        }
+    public String getCurrentUsername() {
+        return currentUsername;
+    }
 
-    // Returns the current login username
-    public String getCurrentUsername() {return username;}
+    //SHA-256 one-way hash
+    private String hashPassword(String password) throws NoSuchAlgorithmException {
+        MessageDigest digest = MessageDigest.getInstance("SHA-256"); //Instantiates a SHA-256 hash
+        byte[] hash = digest.digest(password.getBytes()); //Hashes the binary version of String password stores it in a byte array
+        return Base64.getEncoder().encodeToString(hash); //Returns the byte[] hash as a readable String
+    }
+    
 
-    // Returns the current login password
-    public String getCurrentPassword() {return password;}
 }
             
 
@@ -105,6 +172,7 @@ class Note{
     private boolean isPasswordProtected;
     private boolean isEncrypted;
     private String passwordHash;
+    private File file;
     
     public Note(String name, String directory, boolean isPasswordProtected, boolean isEncrypted){
         this.name = name;
@@ -115,7 +183,7 @@ class Note{
 
     //Creates the Note's respective file
     public boolean create(){
-        File file = new File(directory, name + ".txt");
+        file = new File(directory, name + ".txt");
         try{
             //Make the full directory if one wasn't provided or doesn't exist
             if (file.getParentFile() != null && !file.getParentFile().exists()){
@@ -134,42 +202,40 @@ class Note{
         }
     }
 
-    /* FILE EDITOR  (create or overwrite content)
+    /* NOTE EDITOR  (create or overwrite content)
        ─────────────────────────────────────────────
-       Writes (or overwrites) the note's content.
+       Appends content to the note's file.
        If the note is password-protected, the correct password must be supplied.
        If the note is encrypted, content is encrypted before writing. */
 
-    public void noteEditor(String content, String password) throws Exception {
+    //Appends content to the note's file. If password is incorrect, deny append and return false.
+    //Otherwise, append content and return true.
+    public boolean editor(String content, String password) throws Exception {    
         if (!authenticate(password)) {
             System.out.println("Incorrect password. Edit denied.");
-            return;
+            return false;
         }
 
-        File file = new File(directory, name + ".txt");
-        String dataToWrite = isEncrypted ? fileEncrypt(content, password) : content;
-
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
-            writer.write(dataToWrite);
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, true))) {
+            writer.write(content);
             System.out.println("Note saved successfully.");
         } catch (IOException e) {
             System.err.println("Error writing file: " + e.getMessage());
         }
+        return true;
     }
 
-    /**
-     * Reads the note's content.
-     * If encrypted, the content is decrypted before being returned.
-     */
-    public String readNote(String password) throws Exception {
+    //Reads the note's content. If encrypted, the content is decrypted before being returned.
+    public String read(String password) throws Exception {
+        //If password is incorrect, read will be denied
         if (!authenticate(password)) {
             System.out.println("Incorrect password. Read denied.");
             return null;
         }
 
-        File file = new File(directory, name + ".txt");
         StringBuilder content = new StringBuilder();
 
+        //Builds content line by line and catches the IOException
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String line;
             while ((line = reader.readLine()) != null) {
@@ -181,12 +247,16 @@ class Note{
         }
 
         String raw = content.toString().trim();
-        return isEncrypted ? fileDecrypt(raw, password) : raw;
+
+        //If isEncrypted == true, return decrypted note, else return raw
+        return isEncrypted ? decrypt(raw, password) : raw;
     }
 
-    // ─────────────────────────────────────────────
-    //  PASSWORD PROTECTION
-    // ─────────────────────────────────────────────
+    /*  PASSWORD PROTECTION
+        ─────────────────────────────────────────────
+        Implements password protection and the option to remove a password from a note. 
+        Created passwords are hashed and stored in passwordHash. The authenticate method 
+        verifies a password and can only be used within this class. */
 
     //Enables password protection by hashing and storing the given password.
     public void passwordProtector(String password) throws NoSuchAlgorithmException {
@@ -232,7 +302,7 @@ class Note{
         Encrypts plaintext using a Caesar cipher.
         The shift value is derived from the sum of the password's char values. */
 
-    public String fileEncrypt(String plainText, String password) {
+    public String encrypt(String plainText, String password) {
         int shift = deriveShift(password);
         StringBuilder encrypted = new StringBuilder();
 
@@ -248,7 +318,7 @@ class Note{
 }
 
     //Decrypts a Caesar-encrypted string by reversing the shift.
-    public String fileDecrypt(String encryptedText, String password) {
+    public String decrypt(String encryptedText, String password) {
         int shift = deriveShift(password);
         StringBuilder decrypted = new StringBuilder();
 
