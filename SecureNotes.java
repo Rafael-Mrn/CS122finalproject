@@ -16,11 +16,11 @@ class SecureNotes {
         Scanner scan = new Scanner(System.in);
         Credentials credentials = new Credentials();
         
-        
         System.out.println("====================================================================================");
         System.out.println("Welcome to SecureNotes, the secure HIPAA-aware note-taking platform for therapists.");
         System.out.println("====================================================================================\n");
         
+        //Registration loop
         boolean registration = false;
         while (!registration){
             System.out.print("Enter a username to register: ");
@@ -33,6 +33,7 @@ class SecureNotes {
             }
         }
 
+        //Login loop
         boolean login = false;
         while (!login){
             System.out.print("Enter your username to login: ");
@@ -58,15 +59,24 @@ class SecureNotes {
             System.out.println("5. Exit");
 
             System.out.print("\nEnter a choice 1-5: ");
-            choice = scan.nextInt();
+
+            // Guards against non-integer input on main menu
+            try {
+                choice = scan.nextInt();
+            } catch (InputMismatchException e) {
+                System.out.println("Choice must be a number 1-5.");
+                scan.nextLine(); // clear bad input
+                continue;
+            }
+
             scan.nextLine(); //Clear buffer
 
             if (choice == 1){
                 System.out.println("\n=====NOTE MANAGER=====");
                 System.out.println("1. Create new Note");
                 System.out.println("2. Delete an existing Note");
-                
                 System.out.print("\nEnter a choice 1 or 2: ");
+                
                 int managerChoice = 0;
 
                 try {
@@ -77,6 +87,7 @@ class SecureNotes {
 
                 scan.nextLine(); //Clear buffer
 
+                //Create new note
                 if (managerChoice == 1){
                     System.out.print("Enter directory to store Note: ");
                     String directory = scan.nextLine();
@@ -88,16 +99,22 @@ class SecureNotes {
                     if (newNote.create()){
                         System.out.print("Enter password to protect note: ");
                         String password = scan.nextLine();
-                        existingNotes.add(newNote);
+                        
                         try {
                         newNote.passwordProtector(password);
                         } catch (NoSuchAlgorithmException e){
                             System.out.println("Error creating password: " + e.getMessage());
                         }
+
+                        existingNotes.add(newNote);
+                        System.out.println("Note added to your collection.");
                     } 
 
+                //Delete existing note
                 } else if (managerChoice == 2){
                     listNotes();
+                    if (existingNotes.isEmpty()) break;
+
                     System.out.print("Enter Note name to delete: ");
                     String name = scan.nextLine();
 
