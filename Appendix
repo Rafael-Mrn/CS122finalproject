@@ -1,5 +1,5 @@
 1. TEAM CONTRIBUTION
-   [Show who coded what — both teammates listed with roles from proposal]
+who coded what]
 
 2. JAVA CONCEPTS APPLIED
    [File I/O, ArrayList, HashMap]
@@ -13,7 +13,10 @@
    Week 2: Curating the presentation/appendix + working on the codebase (MVP)]
 
 5. HOW WE COLLABORATED
-   [Day One ]
+   [Day One- Discussed our proposal and started building upon each others ideas based on our own personal passions (cybersecurity).
+Week one/two- we randomly were working on the proposal outside of class at the same time and messaged each other since then. 
+Making sure we are both on the same page and adding stuff that we learned/know into our project in someway.
+We communicated everything together verbally and outside of class the entire process.]
 
 6. VIABILITY TESTING (new section)
    [How you validated the MVP in practice]
@@ -24,10 +27,25 @@
 
 7. CITATIONS & EXTERNAL RESOURCES (REQUIRED)
    [All sources including research for proposal sections 9-10]
-   - Stack Overflow, Claude, YouTube references
-   - Market research sources
-   - Competitive analysis sources
-   - User interview notes
+    Source 1: TherapyNotes
+https://www.therapynotes.com/
 
+ Source 2: Mental Health Software Market Size to Reach USD 18.16 Billion by 2033, Driven by Accelerating Digital Care Adoption and AI-Enabled Behavioral Health Solutions - SNS Insider
+https://finance.yahoo.com/news/mental-health-software-market-size-111600268.html
+
+ Source 3: Preparing for Software Testing: 8 Best Practices for Health Plans
+https://healthedge.com/resources/blog/ps-preparing-for-software-testing-8-best-practices-for-health-plans
+
+Source 4: Essential Insights into U.S. Mental Health Workforce: Therapist and Psychologist Demographics and Trends
+https://www.integrativepsychology.org/us-mental-health-workforce-stats
+
+Source 5: Epic EHR Health System Platform
+https://www.epic.com/software/
+
+Interviews: A licensed therapist (Aime Petrikas)
 8. REFLECTIONS & LESSONS LEARNED
-   [Growth and learning]
+I believe our idea was solid and integrated our world (cybersecurity/tech) mixing it with healthcare.
+It is not really vocalized on the therapists perspectives while using new digital tools to help them.
+It is definitely an underrated topic. Not a lot of people are educated on the concept/background info
+that is putting this into works, because we are normally the user in this case, not the developer.
+I'd like to further expand on this project with more time, so it can build up to it's capabilities. (Mo)
