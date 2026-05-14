@@ -1,27 +1,21 @@
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.InputMismatchException;
 import java.util.Scanner;
 import java.io.*;
 import java.security.*;
 import java.util.Base64;
 
 
-
-
-
-
 class SecureNotes {
     /*This will run a while loop with options given to create/edit an existing text file (classs fileDatabase, fileCreate and fileEditor method), password protect a file (passwordProtector method),
-    encrypt/decrypt a file (fileEncrypt). The loop only begins after successful login (class Credentials). The loop will automatically exit after 5 mintues of inactivity during login.
+    encrypt/decrypt a file (fileEncrypt). The loop only begins after successful login (class Credentials).
     */
-
-    private HashSet<Note> existingNotes = new HashSet<Note>();
-    
-
-
+    public static HashSet<Note> existingNotes = new HashSet<Note>();
     public static void main(String[] args) {
         Scanner scan = new Scanner(System.in);
         Credentials credentials = new Credentials();
+        
         
         System.out.println("====================================================================================");
         System.out.println("Welcome to SecureNotes, the secure HIPAA-aware note-taking platform for therapists.");
@@ -54,48 +48,194 @@ class SecureNotes {
         int choice = 0;
 
         while (choice != 5){
+            System.out.println("\n==========================");
+            System.out.println("     SecureNotes Menu     ");
+            System.out.println("==========================");
             System.out.println("1. Manage notes (Create or Delete)");
             System.out.println("2. Edit an existing note");
             System.out.println("3. Decrypt a note");
             System.out.println("4. Remove password from a note");
             System.out.println("5. Exit");
 
-            System.out.print("Enter a choice 1-5: ");
+            System.out.print("\nEnter a choice 1-5: ");
             choice = scan.nextInt();
+            scan.nextLine(); //Clear buffer
 
             if (choice == 1){
-                System.out.println("=====NOTE MANAGER=====")
+                System.out.println("\n=====NOTE MANAGER=====");
                 System.out.println("1. Create new Note");
                 System.out.println("2. Delete an existing Note");
                 
-                System.out.println("Enter a choice 1 or 2: ");
-                int managerChoice = scan.nextInt();
+                System.out.print("\nEnter a choice 1 or 2: ");
+                int managerChoice = 0;
 
-                if (managerChoice == 1){
-                    System.out.print("Enter new Note's name: ");
-                    System.out.println("Enter password to access note: ")
+                try {
+                    managerChoice = scan.nextInt();
+                } catch (InputMismatchException e){
+                    System.out.println("Choice must be a number 1 or 2.");
                 }
 
+                scan.nextLine(); //Clear buffer
 
+                if (managerChoice == 1){
+                    System.out.print("Enter directory to store Note: ");
+                    String directory = scan.nextLine();
+                    System.out.print("Enter new Note's name: ");
+                    String name = scan.nextLine();
 
+                    Note newNote = new Note(name, directory);
+                    
+                    if (newNote.create()){
+                        System.out.print("Enter password to protect note: ");
+                        String password = scan.nextLine();
+                        existingNotes.add(newNote);
+                        try {
+                        newNote.passwordProtector(password);
+                        } catch (NoSuchAlgorithmException e){
+                            System.out.println("Error creating password: " + e.getMessage());
+                        }
+                    } 
+
+                } else if (managerChoice == 2){
+                    listNotes();
+                    System.out.print("Enter Note name to delete: ");
+                    String name = scan.nextLine();
+
+                    boolean removed = existingNotes.removeIf(note -> note.getName().equals(name));
+                    if (removed) {
+                        System.out.println(name + " successfully deleted!");
+                    } else {
+                        System.out.println("Note not found.");
+                    }
+                } 
+            // ── 2. EDIT NOTE ─────────────────────────────────────────────
+            } else if (choice == 2) {
+                listNotes();
+                if (existingNotes.isEmpty()) continue;
+ 
+                System.out.print("Enter Note name to edit: ");
+                String name = scan.nextLine();
+ 
+                Note target = findNote(name);
+                if (target == null) {
+                    System.out.println("Note not found.");
+                    continue;
+                }
+ 
+                System.out.print("Enter Note password: ");
+                String password = scan.nextLine();
+                System.out.print("Enter content to append: ");
+                String content = scan.nextLine();
+ 
+                try {
+                    target.editor(content, password);
+                } catch (Exception e) {
+                    System.out.println("Error editing note: " + e.getMessage());
+                }
+ 
+            // ── 3. DECRYPT NOTE ──────────────────────────────────────────
+            } else if (choice == 3) {
+                listNotes();
+                if (existingNotes.isEmpty()) continue;
+ 
+                System.out.print("Enter Note name to decrypt: ");
+                String name = scan.nextLine();
+ 
+                Note target = findNote(name);
+                if (target == null) {
+                    System.out.println("Note not found.");
+                    continue;
+                }
+ 
+                if (!target.getIsEncrypted()) {
+                    System.out.println("This note is not encrypted.");
+                    continue;
+                }
+ 
+                System.out.print("Enter Note password: ");
+                String password = scan.nextLine();
+ 
+                try {
+                    String decryptedContent = target.read(password);
+                    if (decryptedContent != null) {
+                        System.out.println("\n--- Decrypted Content ---");
+                        System.out.println(decryptedContent);
+                        System.out.println("-------------------------");
+                    }
+                } catch (Exception e) {
+                    System.out.println("Error decrypting note: " + e.getMessage());
+                }
+ 
+            // ── 4. REMOVE PASSWORD ───────────────────────────────────────
+            } else if (choice == 4) {
+                listNotes();
+                if (existingNotes.isEmpty()) continue;
+ 
+                System.out.print("Enter Note name to remove password from: ");
+                String name = scan.nextLine();
+ 
+                Note target = findNote(name);
+                if (target == null) {
+                    System.out.println("Note not found.");
+                    continue;
+                }
+ 
+                if (!target.getIsPasswordProtected()) {
+                    System.out.println("This note has no password protection.");
+                    continue;
+                }
+ 
+                System.out.print("Enter current password to confirm: ");
+                String password = scan.nextLine();
+ 
+                try {
+                    target.removePassword(password);
+                } catch (NoSuchAlgorithmException e) {
+                    System.out.println("Error removing password: " + e.getMessage());
+                }
+ 
+            // ── 5. EXIT ──────────────────────────────────────────────────
+            } else if (choice == 5) {
+                System.out.println("Goodbye!");
+ 
+            } else {
+                System.out.println("Invalid choice. Please enter a number 1-5.");
             }
+        }
+        scan.close();
+    }
 
+    // Lists all notes with their status
+    public static void listNotes(){
+        int count = 0;
+        System.out.println("\n----Current Notes----");
+        if (existingNotes.size() == 0){
+            System.out.println("\t None.");
+        }
+        for (Note note : existingNotes){
+            count++;
+            System.out.println(count + ". " + note.getName() + "\n\tDirectory: " + note.getDirectory() + "\n\tPassword Protection: " + note.getIsPasswordProtected() + "\n\tEncryption Status: " + note.getIsEncrypted());
         }
         
+    }
 
+    // Finds a Note by name. Returns null if not found.
+    public static Note findNote(String name) {
+        for (Note note : existingNotes) {
+            if (note.getName().equals(name)) return note;
+        }
+        return null;
     }
 
     
 }
 
 class Credentials {
-
-    // Stores username -> [hash, salt] pairs
     private final HashMap<String, String> credentials;
     private String currentUsername;
 
     public Credentials() {
-        credentials = new HashMap<>();
+        credentials = new HashMap<String, String>();
     }
 
     public boolean register(String username, String password) {
@@ -174,12 +314,17 @@ class Note{
     private String passwordHash;
     private File file;
     
-    public Note(String name, String directory, boolean isPasswordProtected, boolean isEncrypted){
+    public Note(String name, String directory){
         this.name = name;
         this.directory = directory;
-        this.isPasswordProtected = isPasswordProtected;
-        this.isEncrypted = isEncrypted;
+        this.isPasswordProtected = true;
+        this.isEncrypted = false;
     }
+
+    public String getName() {return name;}
+    public String getDirectory() {return directory;}
+    public boolean getIsPasswordProtected() {return isPasswordProtected;}
+    public boolean getIsEncrypted() {return isEncrypted;}
 
     //Creates the Note's respective file
     public boolean create(){
@@ -191,7 +336,7 @@ class Note{
             }
             //Creates the file
             if (!file.createNewFile()){
-                System.out.println(file + "already exists!");
+                System.out.println(file + " already exists!");
                 return false;
             }
             System.out.println("Note created at: " + file.getAbsolutePath());
@@ -202,7 +347,7 @@ class Note{
         }
     }
 
-    /* NOTE EDITOR  (create or overwrite content)
+    /* NOTE EDITOR  (append content)
        ─────────────────────────────────────────────
        Appends content to the note's file.
        If the note is password-protected, the correct password must be supplied.
